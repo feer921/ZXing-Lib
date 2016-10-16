@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval" >
+
+    <size android:width="@dimen/sc_seekbar_thumb_height"  android:height="@dimen/sc_seekbar_thumb_height"/>
+    
+
+    <gradient
+        android:angle="270"
+        android:centerColor="@color/sc_seekbar_thumb_bg"
+        android:endColor="@color/sc_seekbar_thumb_bg"
+        android:startColor="@color/sc_seekbar_thumb_bg" />
+
+</shape>

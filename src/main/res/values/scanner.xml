@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item name="scanner_bg" type="id"/> <!-- 摄像头遮罩 -->
+    <item name="scanner_back" type="id"/>
+    <item name="scanner_on_off_flash_btn" type="id"/>
+    <item name="scanner_preview_view" type="id"/>
+    <item name="scanner_viewfinder_view" type="id"/>
+    <item name="scanner_reduce" type="id"/>
+    <item name="scanner_seekbar" type="id"/>
+    <item name="scanner_scale_layout" type="id" />
+    <item name="scanner_add" type="id"/>
+    <item name="scanner_auto_focus" type="id"/>
+    <item name="scanner_decode" type="id"/>
+    <item name="scanner_decode_failed" type="id"/>
+    <item name="scanner_decode_succeeded" type="id"/>
+    <item name="scanner_encode_failed" type="id"/>
+    <item name="scanner_encode_succeeded" type="id"/>
+    <item name="scanner_launch_product_query" type="id"/>
+    <item name="scanner_quit" type="id"/>
+    <item name="scanner_restart_preview" type="id"/>
+    <item name="scanner_return_scan_result" type="id"/>
+    <item name="scanner_web" type="id"/>
+
+    <string name="scanner_title">扫一扫</string>
+    <string name="scanner_on_flash">已开</string>
+    <string name="scanner_off_flash">已关</string>
+
+    <color name="scanner_on_flash_color">#FFffe852</color>
+    <color name="scanner_off_flash_color">#FFffffff</color>
+
+    <!-- 定义初始默认值 -->
+    <bool name="scanner_draw_lr_default">false</bool>
+    <bool name="scanner_draw_tb_default">true</bool>
+    <bool name="scanner_inside_default">false</bool>
+
+    <dimen name="scanner_rect_frame_default">0dip</dimen>
+
+    <color name="scanner_rect_color_default">#BB000000</color>
+
+    <dimen name="scanner_image_frame_default">2dip</dimen>
+    <dimen name="scanner_image_width_default">20dip</dimen>
+    <dimen name="scanner_line_height_default">8dip</dimen>
+
+    <integer name="scanner_line_speed_default">5</integer>
+
+    <color name="scanner_image_color_default">#fffc6e0f</color>
+    <color name="scanner_bg_default">#64000000</color>
+    <color name="scanner_bg_end_default">#64000000</color>
+    <color name="scanner_point_color_default">#BBfc6e0f</color>
+
+    <declare-styleable name="Scanner">
+
+        <!-- 是否绘制左右边框图片 -->
+        <attr name="draw_lr" format="boolean" />
+        <!-- 是否绘制上下边框图片 -->
+        <attr name="draw_tb" format="boolean" />
+        <!-- 是否是内圈边框 -->
+        <attr name="inside" format="boolean" />
+        <!-- 边框值 -->
+        <attr name="rect_frame" format="dimension" />
+        <!-- 边框颜色 -->
+        <attr name="rect_color" format="color" />
+        <!-- 图片的边框值 -->
+        <attr name="image_frame" format="dimension" />
+        <!-- 图片的边框宽 -->
+        <attr name="image_width" format="dimension" />
+        <!-- 图片边框颜色 -->
+        <attr name="image_color" format="color" />
+        <!-- 背景颜色 -->
+        <attr name="bg" format="color" />
+        <!-- 扫描后的背景颜色 -->
+        <attr name="bg_end" format="color" />
+        <!-- 左右背景,可为空 -->
+        <attr name="lr" format="integer" />
+        <!-- 上背景,可为空 -->
+        <attr name="top" format="integer" />
+        <!-- 下背景,可为空 -->
+        <attr name="bottom" format="integer" />
+        <!-- 扫描横线,可为空 -->
+        <attr name="center_anim_line" format="integer" />
+        <!-- 扫描点的颜色 -->
+        <attr name="point_color" format="color" />
+
+        <!-- 扫描横线高度 -->
+        <attr name="line_height" format="dimension" />
+        <!-- 扫描横线速度 -->
+        <attr name="line_speed" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="ScannerCamera">
+
+        <!-- 摄像头自动打开模式 -->
+        <attr name="sc_auto" format="boolean" />
+        <!-- 摄像头宽度 -->
+        <attr name="sc_width" format="integer" />
+        <!-- 摄像头高度 -->
+        <attr name="sc_height" format="integer" />
+        <!-- 左间距，居中则为0 -->
+        <attr name="sc_left" format="integer" />
+        <!-- 上间距，居中则为0 -->
+        <attr name="sc_top" format="integer" />
+        <!-- 是否是全屏 -->
+        <attr name="sc_fullscreen" format="boolean" />
+        <!-- 基于什么分辨率,用于自动拉伸 -->
+        <attr name="sc_baseres" format="integer" />
+    </declare-styleable>
+
+    <!-- 取景框样式:是否绘制左右角、是否绘制上下角、取景框中可能有效像素点的颜色、中间扫描动画线图案、取景框背景、[宽]、[高] -->
+    <style name="viewfinder_style">
+        <item name="draw_lr">true</item>
+        <item name="draw_tb">true</item>
+        <item name="point_color">@color/scanner_point_color_default</item>
+        <item name="center_anim_line">@drawable/scanner_line</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!-- 取景框轮廓样式：定义取景框的尺寸大小、位置信息-->
+    <style name="viewfinder_outline_style">
+        <item name="sc_auto">true</item>
+        <item name="sc_width">440</item>
+        <item name="sc_height">440</item>
+        <item name="sc_left">0</item>
+        <item name="sc_top">150</item>
+        <item name="sc_fullscreen">false</item>
+        <item name="sc_baseres">640</item>
+    </style>
+
+    <!-- 文字的样式 -->
+    <style name="Widget.TextView.Scanner" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#FFffffff</item>
+        <item name="android:text">将二维码/条形码放入框内, 即可自动扫描</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:layout_marginBottom">20dip</item>
+        <item name="android:padding">8dip</item>
+        <item name="android:background">@drawable/scanner_textview_bg</item>
+    </style>
+
+    <!-- 定义seekbar参数 -->
+    <dimen name="sc_seekbar_height">4dip</dimen>
+    <!-- 圆角幅度 -->
+    <dimen name="sc_seekbar_radius">6dip</dimen>
+    <!-- 默认的底色 -->
+    <color name="sc_seekbar_bg">#32FFFFFF</color>
+    <!-- 滚过的颜色 -->
+    <color name="sc_seekbar_select_bg">#00FFFFFF</color>
+    <!-- 选中的高度 -->
+    <dimen name="sc_seekbar_thumb_height">16dip</dimen>
+    <!-- 选中的圆角幅度 -->
+    <dimen name="sc_seekbar_thumb_radius">6dip</dimen>
+    <!-- 选中间距 -->
+    <dimen name="sc_seekbar_splace">20dip</dimen>
+    <!-- 总高度 seekbar_thumb_height + 2*seekbar_splace -->
+    <dimen name="sc_seekbar_all_height">56dip</dimen>
+    <!-- 选中的颜色 -->
+    <color name="sc_seekbar_thumb_bg">#FFffffff</color>
+
+    <!-- seekbar样式 -->
+    <style name="ScannerDivSeekBarView" parent="@android:style/Widget.SeekBar">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">@dimen/sc_seekbar_all_height</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:max">100</item>
+        <item name="android:maxHeight">@dimen/sc_seekbar_height</item>
+        <item name="android:minHeight">@dimen/sc_seekbar_height</item>
+        <item name="android:progressDrawable">@drawable/scanner_view_seekbar_drawable</item>
+        <item name="android:thumb">@drawable/scanner_view_seekbar_thumb_oval</item>
+        <item name="android:thumbOffset">0dip</item>
+        <item name="android:paddingLeft">0dip</item>
+        <item name="android:paddingRight">0dip</item>
+        <item name="android:paddingTop">@dimen/sc_seekbar_splace</item>
+        <item name="android:paddingBottom">@dimen/sc_seekbar_splace</item>
+    </style>
+
+    <!-- <style name="ScannerWeb" parent="@style/DivWebView">
+        <item name="orientation">portrait</item>
+        <item name="isshowloading">true</item>
+        <item name="isdownload">true</item>
+        <item name="isjsaction">true</item>
+        item name="jshead">javascript:</item
+        item name="loadingstyle">@style/DivWebViewLoading</item
+    </style> -->
+    <item name="decode" type="id"/>
+    <item name="decode_failed" type="id"/>
+    <item name="decode_succeeded" type="id"/>
+    <item name="quit" type="id"/>
+    <item name="restart_preview" type="id"/>
+    <item name="return_scan_result" type="id"/>
+    <item type="id" name="launch_product_query"/>
+</resources>
