@@ -39,7 +39,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.common.zxinglib.R;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.Result;

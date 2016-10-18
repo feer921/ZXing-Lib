@@ -1,4 +1,4 @@
-package com.common.zxinglib;
+package com.common.demo;
 
 import org.junit.Test;
 

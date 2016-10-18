@@ -25,9 +25,6 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-
-import com.common.zxinglib.R;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;

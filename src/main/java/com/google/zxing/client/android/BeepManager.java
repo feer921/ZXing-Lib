@@ -25,14 +25,11 @@ import android.media.MediaPlayer;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
-import com.common.zxinglib.R;
-
 import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * Manages beeps and vibrations for {@link CaptureActivity}.
+ * Manages beeps and vibrations for {@link ScannerActivity}.
  */
 final class BeepManager implements MediaPlayer.OnErrorListener, Closeable {
 

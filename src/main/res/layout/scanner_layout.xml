@@ -54,11 +54,11 @@
         android:layout_above="@id/scanner_scale_layout"
         android:layout_centerHorizontal="true" />
     <TextView
+        android:id="@id/scanner_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="扫一扫"
+        android:text="@string/scanner_title"
         android:textColor="#fff"
-        android:textStyle="bold"
         android:textSize="18sp"
         android:padding="5dp"
         android:gravity="center"

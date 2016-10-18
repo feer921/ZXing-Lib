@@ -41,7 +41,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.SeekBar;
 
-import com.common.zxinglib.R;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.Result;
@@ -88,6 +87,7 @@ public final class ScannerActivity extends Activity implements SurfaceHolder.Cal
   private CaptureActivityHandler handler;
   private Result savedResultToShow;
   private ViewfinderView viewfinderView;
+  private View scanTitleView;
   private Result lastResult;
   private boolean hasSurface;
   private boolean copyToClipboard;
@@ -148,7 +148,7 @@ public final class ScannerActivity extends Activity implements SurfaceHolder.Cal
    * 各使用方想得到本二维码扫描界面的结果，需要在{@link Activity#onActivityResult(int, int, Intent)}中通过返回的Intent
    * 获取key:"result"的字符串结果
    */
-  public static final String INTENT_KEY_SCAN_RESULT = "result";
+  public static final String INTENT_KEY_SCAN_RESULT = "scan_result";
   private static final String KEY_VIEWFINDERSTYLE = "viewfinder_style";
   private static final String KEY_SCAN_LAYOUT = "scan_layout";
   private int viewfinderOutLineStyleResId;
@@ -182,6 +182,7 @@ public final class ScannerActivity extends Activity implements SurfaceHolder.Cal
     viewfinderView = (ViewfinderView) findViewById(R.id.scanner_viewfinder_view);
     seekBar2ScaleCamera = (SeekBar)findViewById(R.id.scanner_seekbar);
     scaleCameraLayout = findViewById(R.id.scanner_scale_layout);
+    scanTitleView = findViewById(R.id.scanner_title);
   }
 
   @Override

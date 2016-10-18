@@ -30,11 +30,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.SeekBar;
-
-import com.common.zxinglib.R;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.camera.CameraManager;
-
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -69,39 +66,67 @@ public final class ViewfinderView extends View {
      * 中间滑动线的最顶端位置
      */
     private int animLineSlideTop;
+    /**
+     * 当前中间动画线条是否向下移动
+     */
     private boolean animLineSlideToDown;
     private int mCenterAnimLineH;// 中间横线高度
-    private int mAnimSpeed;// 中间横线滚动速度
-
+    private int mCenterLineMoveSpeed;// 中间横线滚动速度
+    /**
+     * 扫描结果位图
+     * @deprecated
+     */
     private Bitmap resultBitmap;
-    private int maskColor;// 背景颜色
-    private int mRectFrame;// 边框的宽度
-    private int mScreenRate;// 图片宽的长度
-    private int mImageFrame;// 图片的宽度
-    private int resultColor;
-    private int frameColor;// 线条框的颜色
-    private int imageColor;// 图片框的颜色
-    private boolean isInside;// 是否是内圈绘制边框
+//    /**
+//     * 扫描结果的颜色
+//     * @deprecated
+//     */
+//    private int scanResultColor;
+
+    /**
+     * 环绕取景框的背景颜色
+     */
+    private int aroundViewfinderBgColor;// 背景颜色
+    private int viewfinderOutlineWidth;// 边框的宽度
+    /**
+     * 四个角(直角)一边的边长
+     */
+    private int cornerSideLineLength;// 图片宽的长度
+    /**
+     * 角的每条线/边的线/边宽
+     */
+    private int cornerSideLineWidth;// 图片的宽度
+    /**
+     * 取景框轮廓线条的颜色
+     */
+    private int viewfinderOutlineColor;// 线条框的颜色
+    private int cornerColor;// 图片框的颜色
+    private boolean isCornerInSide;// 是否是内圈绘制边框
 
     private Drawable drawableTop;
     private Drawable drawableBottom;
     private Drawable drawableLeft;
     private Drawable drawableRight;
+    /**
+     * 显示正在扫描的动画线条
+     */
     private Drawable scanAnimLine;
     /**
-     * 扫描点
+     * 扫描出的有效的像素点的颜色
      */
-    private int resultPointColor;
+    private int validScanedPointPixelsColor;
     private Collection<ResultPoint> possibleResultPoints;
     private Collection<ResultPoint> lastPossibleResultPoints;
-
-    boolean isFirst;
+    /**
+     * 是否第一次绘制
+     */
+    boolean isFirstDraw;
 
     /**
      * 四个角的显示
      */
-    private boolean mLRShow;
-    private boolean mTBShow;
+    private boolean isLeftRightCornerShow;
+    private boolean isTopBottomCornerShow;
 
     public ViewfinderView(Context context) {
         this(context, null);
@@ -114,21 +139,18 @@ public final class ViewfinderView extends View {
     public ViewfinderView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         final Resources res = getResources();
-        final int defaultMaskColor = res.getColor(R.color.scanner_bg_default);
-        final int defaultResultColor = res.getColor(R.color.scanner_bg_end_default);
-        final int defaultFrameColor = res.getColor(R.color.scanner_rect_color_default);
-        final int defaultImageColor = res.getColor(R.color.scanner_image_color_default);
-        final int defaultResultPointColor = res.getColor(R.color.scanner_point_color_default);
-        final boolean defaultLRShow = res.getBoolean(R.bool.scanner_draw_lr_default);
-        final boolean defaultTBShow = res.getBoolean(R.bool.scanner_draw_tb_default);
+        final int defAroundBgColor = res.getColor(R.color.scanner_bg_default);
+//        final int defScanedResultBgColor = res.getColor(R.color.scanner_bg_end_default);
+        final int defOutlineColor = res.getColor(R.color.scanner_rect_color_default);
+        final int defCornerColor = res.getColor(R.color.scanner_image_color_default);
+        final int defScanedPointColor = res.getColor(R.color.scanner_point_color_default);
+        final boolean defLeftRightCornerShow = res.getBoolean(R.bool.scanner_draw_lr_default);
+        final boolean defTopBottomCornerShow = res.getBoolean(R.bool.scanner_draw_tb_default);
         final boolean defaultIsInside = res.getBoolean(R.bool.scanner_inside_default);
 
-        final int defaultRectFrame = res
-                .getDimensionPixelSize(R.dimen.scanner_rect_frame_default);
-        final int defaultImageFrame = res
-                .getDimensionPixelSize(R.dimen.scanner_image_frame_default);
-        final int defaultImageWidth = res
-                .getDimensionPixelSize(R.dimen.scanner_image_width_default);
+        final int defOutlineWidth = res.getDimensionPixelSize(R.dimen.scanner_rect_frame_default);
+        final int defCornerRectWidth = res.getDimensionPixelSize(R.dimen.scanner_image_frame_default);
+        final int defCornerSideLineLength = res.getDimensionPixelSize(R.dimen.scanner_image_width_default);
         final int defaultLineHeight = res.getDimensionPixelSize(R.dimen.scanner_line_height_default);
         final int defaultLineSpeed = res.getInteger(R.integer.scanner_line_speed_default);
 
@@ -138,33 +160,35 @@ public final class ViewfinderView extends View {
 
         // Retrieve styles attributes
         TypedArray a = context.obtainStyledAttributes(attrs,R.styleable.Scanner, defStyle, 0);
-        maskColor = a.getColor(R.styleable.Scanner_bg, defaultMaskColor);
-        resultColor = a.getColor(R.styleable.Scanner_bg_end, defaultResultColor);
-        frameColor = a.getColor(R.styleable.Scanner_rect_color,defaultFrameColor);
-        imageColor = a.getColor(R.styleable.Scanner_image_color,defaultImageColor);
-        resultPointColor = a.getColor(R.styleable.Scanner_point_color,defaultResultPointColor);
-        mRectFrame = a.getDimensionPixelSize(R.styleable.Scanner_rect_frame,defaultRectFrame);
-        mImageFrame = a.getDimensionPixelSize(R.styleable.Scanner_image_frame,defaultImageFrame);
-        mScreenRate = a.getDimensionPixelSize(R.styleable.Scanner_image_width,defaultImageWidth);
-        mCenterAnimLineH = a.getDimensionPixelSize(R.styleable.Scanner_line_height,defaultLineHeight);
-        mAnimSpeed = a.getInt(R.styleable.Scanner_line_speed, defaultLineSpeed);
+        aroundViewfinderBgColor = a.getColor(R.styleable.Scanner_around_bg_color, defAroundBgColor);
+//        scanResultColor = a.getColor(R.styleable.Scanner_bg_end, defScanedResultBgColor);
+        viewfinderOutlineColor = a.getColor(R.styleable.Scanner_viewfinder_outline_color,defOutlineColor);
+        cornerColor = a.getColor(R.styleable.Scanner_corner_color,defCornerColor);
+        validScanedPointPixelsColor = a.getColor(R.styleable.Scanner_scaned_point_color,defScanedPointColor);
+        viewfinderOutlineWidth = a.getDimensionPixelSize(R.styleable.Scanner_viewfinder_outline_width,defOutlineWidth);
 
-        mLRShow = a.getBoolean(R.styleable.Scanner_draw_lr, defaultLRShow);
-        mTBShow = a.getBoolean(R.styleable.Scanner_draw_tb, defaultTBShow);
-        isInside = a.getBoolean(R.styleable.Scanner_inside, defaultIsInside);
+        cornerSideLineWidth = a.getDimensionPixelSize(R.styleable.Scanner_corner_side_line_width,defCornerRectWidth);
+        cornerSideLineLength = a.getDimensionPixelSize(R.styleable.Scanner_corner_side_line_length,defCornerSideLineLength);
 
-        if (mTBShow) {
-            int topId = a.getResourceId(R.styleable.Scanner_top, defaultTop);
+        mCenterAnimLineH = a.getDimensionPixelSize(R.styleable.Scanner_center_anim_line_h,defaultLineHeight);
+        mCenterLineMoveSpeed = a.getInt(R.styleable.Scanner_center_line_move_speed, defaultLineSpeed);
+
+        isLeftRightCornerShow = a.getBoolean(R.styleable.Scanner_draw_left_right_corner, defLeftRightCornerShow);
+        isTopBottomCornerShow = a.getBoolean(R.styleable.Scanner_draw_top_bottom_corner, defTopBottomCornerShow);
+        isCornerInSide = a.getBoolean(R.styleable.Scanner_isCornerInside, defaultIsInside);
+
+        if (isTopBottomCornerShow) {
+            int topId = a.getResourceId(R.styleable.Scanner_around_top_bg_res, defaultTop);
             if (topId > 0) {
                 drawableTop = res.getDrawable(topId);
             }
-            int bottomId = a.getResourceId(R.styleable.Scanner_bottom,defaultBottom);
+            int bottomId = a.getResourceId(R.styleable.Scanner_around_bottom_res,defaultBottom);
             if (bottomId > 0) {
                 drawableBottom = res.getDrawable(bottomId);
             }
         }
-        if (mLRShow) {
-            int lrID = a.getResourceId(R.styleable.Scanner_lr, defaultLR);
+        if (isLeftRightCornerShow) {
+            int lrID = a.getResourceId(R.styleable.Scanner_around_lr_bg_res, defaultLR);
             if (lrID > 0) {
                 drawableLeft = res.getDrawable(lrID);
                 drawableRight = res.getDrawable(lrID);
@@ -175,9 +199,7 @@ public final class ViewfinderView extends View {
         if (centerLineDrawableId > 0) {
             scanAnimLine = res.getDrawable(centerLineDrawableId);
         }
-
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
         possibleResultPoints = new HashSet<ResultPoint>(5);
         lastPossibleResultPoints = null;
         a.recycle();
@@ -210,8 +232,8 @@ public final class ViewfinderView extends View {
             return;
         }
         // 初始化中间线滑动的最上边和最下边
-        if (!isFirst) {
-            isFirst = true;
+        if (!isFirstDraw) {
+            isFirstDraw = true;
             animLineSlideTop = viewfinderRect.top;
         }
 
@@ -219,14 +241,15 @@ public final class ViewfinderView extends View {
         int width = canvas.getWidth();
         int height = canvas.getHeight();
 
-        paint.setColor(resultBitmap != null ? resultColor : maskColor);
+//        paint.setColor(resultBitmap != null ? scanResultColor : aroundViewfinderBgColor);
+        paint.setColor(aroundViewfinderBgColor);
 
         // 画出扫描框外面的阴影部分，共四个部分，扫描框的上面到屏幕上面，扫描框的下面到屏幕下面
         // 扫描框的左边面到屏幕左边，扫描框的右边到屏幕右边
         canvas.drawRect(0, 0, width, viewfinderRect.top, paint);
-        canvas.drawRect(0, viewfinderRect.top, viewfinderRect.left, viewfinderRect.bottom + mRectFrame, paint);
-        canvas.drawRect(viewfinderRect.right + mRectFrame, viewfinderRect.top, width, viewfinderRect.bottom + mRectFrame, paint);
-        canvas.drawRect(0, viewfinderRect.bottom + mRectFrame, width, height, paint);
+        canvas.drawRect(0, viewfinderRect.top, viewfinderRect.left, viewfinderRect.bottom + viewfinderOutlineWidth, paint);
+        canvas.drawRect(viewfinderRect.right + viewfinderOutlineWidth, viewfinderRect.top, width, viewfinderRect.bottom + viewfinderOutlineWidth, paint);
+        canvas.drawRect(0, viewfinderRect.bottom + viewfinderOutlineWidth, width, height, paint);
 
         if (resultBitmap != null) {
             // Draw the opaque result bitmap over the scanning rectangle
@@ -235,67 +258,59 @@ public final class ViewfinderView extends View {
         }
         else {
             // 画扫描框边上的角，总共4个角每个角2小短线即8个部分
-            paint.setColor(imageColor);
+            paint.setColor(cornerColor);
             if (drawableTop == null || drawableBottom == null) {
-                int mSpelce = mRectFrame + mImageFrame;
+                int mSpelce = viewfinderOutlineWidth + cornerSideLineWidth;
                 int left = viewfinderRect.left - mSpelce;
                 int right = viewfinderRect.right + mSpelce;
                 int top = viewfinderRect.top - mSpelce;
                 int bottom = viewfinderRect.bottom + mSpelce;
 
-                if (isInside) {
-                    mSpelce = mRectFrame;
+                if (isCornerInSide) {
+                    mSpelce = viewfinderOutlineWidth;
                     left = viewfinderRect.left + mSpelce;
                     right = viewfinderRect.right - mSpelce;
                     top = viewfinderRect.top + mSpelce;
                     bottom = viewfinderRect.bottom - mSpelce;
                 }
 
-                if (mLRShow) {
+                if (isLeftRightCornerShow) {
                     // 左上角横线
-                    canvas.drawRect(left, top, left + mScreenRate, top
-                            + mImageFrame, paint);
+                    canvas.drawRect(left, top, left + cornerSideLineLength, top + cornerSideLineWidth, paint);
                     // 左上角竖线
-                    canvas.drawRect(left, top, left + mImageFrame, top
-                            + mScreenRate, paint);
+                    canvas.drawRect(left, top, left + cornerSideLineWidth, top + cornerSideLineLength, paint);
                     // 右上角横线
-                    canvas.drawRect(right - mScreenRate, top, right, top
-                            + mImageFrame, paint);
+                    canvas.drawRect(right - cornerSideLineLength, top, right, top + cornerSideLineWidth, paint);
                     // 右上角竖线
-                    canvas.drawRect(right - mImageFrame, top, right, top
-                            + mScreenRate, paint);
+                    canvas.drawRect(right - cornerSideLineWidth, top, right, top + cornerSideLineLength, paint);
                 }
 
-                if (mTBShow) {
+                if (isTopBottomCornerShow) {
                     // 左下角横线
-                    canvas.drawRect(left, bottom - mImageFrame, left
-                            + mScreenRate, bottom, paint);
+                    canvas.drawRect(left, bottom - cornerSideLineWidth, left + cornerSideLineLength, bottom, paint);
                     // 左下角竖线
-                    canvas.drawRect(left, bottom - mScreenRate, left
-                            + mImageFrame, bottom, paint);
+                    canvas.drawRect(left, bottom - cornerSideLineLength, left + cornerSideLineWidth, bottom, paint);
                     // 右下角横线
-                    canvas.drawRect(right - mScreenRate, bottom - mImageFrame,
-                            right, bottom, paint);
+                    canvas.drawRect(right - cornerSideLineLength, bottom - cornerSideLineWidth, right, bottom, paint);
                     // 右下角竖线
-                    canvas.drawRect(right - mImageFrame, bottom - mScreenRate,
-                            right, bottom, paint);
+                    canvas.drawRect(right - cornerSideLineWidth, bottom - cornerSideLineLength, right, bottom, paint);
                 }
             }
 
-            paint.setColor(frameColor);
+            paint.setColor(viewfinderOutlineColor);
             // 绘制上面长方形
-            canvas.drawRect(viewfinderRect.left - mRectFrame, viewfinderRect.top - mRectFrame,
-                    viewfinderRect.right + mRectFrame, viewfinderRect.top + mRectFrame, paint);
+            canvas.drawRect(viewfinderRect.left - viewfinderOutlineWidth, viewfinderRect.top - viewfinderOutlineWidth,
+                    viewfinderRect.right + viewfinderOutlineWidth, viewfinderRect.top + viewfinderOutlineWidth, paint);
             // 绘制左边长方形
-            canvas.drawRect(viewfinderRect.left - mRectFrame, viewfinderRect.top - mRectFrame,
-                    viewfinderRect.left + mRectFrame, viewfinderRect.bottom + mRectFrame, paint);
+            canvas.drawRect(viewfinderRect.left - viewfinderOutlineWidth, viewfinderRect.top - viewfinderOutlineWidth,
+                    viewfinderRect.left + viewfinderOutlineWidth, viewfinderRect.bottom + viewfinderOutlineWidth, paint);
             // 绘制右边长方形
-            canvas.drawRect(viewfinderRect.right - mRectFrame, viewfinderRect.top - mRectFrame,
-                    viewfinderRect.right + mRectFrame, viewfinderRect.bottom + mRectFrame, paint);
+            canvas.drawRect(viewfinderRect.right - viewfinderOutlineWidth, viewfinderRect.top - viewfinderOutlineWidth,
+                    viewfinderRect.right + viewfinderOutlineWidth, viewfinderRect.bottom + viewfinderOutlineWidth, paint);
             // 绘制下面长方形
-            canvas.drawRect(viewfinderRect.left - mRectFrame, viewfinderRect.bottom - mRectFrame,
-                    viewfinderRect.right + mRectFrame, viewfinderRect.bottom + mRectFrame, paint);
-            int drawSize = mImageFrame + mRectFrame - 1;
+            canvas.drawRect(viewfinderRect.left - viewfinderOutlineWidth, viewfinderRect.bottom - viewfinderOutlineWidth,
+                    viewfinderRect.right + viewfinderOutlineWidth, viewfinderRect.bottom + viewfinderOutlineWidth, paint);
+            int drawSize = cornerSideLineWidth + viewfinderOutlineWidth - 1;
             if (drawableTop != null) {
                 drawableTop.setBounds(viewfinderRect.left - drawSize, viewfinderRect.top
                         - drawSize, viewfinderRect.right + drawSize, viewfinderRect.top
@@ -310,7 +325,7 @@ public final class ViewfinderView extends View {
                         viewfinderRect.left, viewfinderRect.bottom);
             if (drawableRight != null)
                 drawableRight.setBounds(viewfinderRect.right, viewfinderRect.top, viewfinderRect.right
-                        + mImageFrame, viewfinderRect.bottom);
+                        + cornerSideLineWidth, viewfinderRect.bottom);
             if (drawableTop != null)
                 drawableTop.draw(canvas);
             if (drawableBottom != null)
@@ -319,6 +334,7 @@ public final class ViewfinderView extends View {
                 drawableLeft.draw(canvas);
             if (drawableRight != null)
                 drawableRight.draw(canvas);
+
             //绘制中间的扫描动画线条
             int viewfinderRectTop = viewfinderRect.top;
             int viewfinderRectBottom = viewfinderRect.bottom - 10;
@@ -329,10 +345,10 @@ public final class ViewfinderView extends View {
                 animLineSlideToDown = false;
             }
             if (animLineSlideToDown) {
-                animLineSlideTop += mAnimSpeed;
+                animLineSlideTop += mCenterLineMoveSpeed;
             }
             else{
-                animLineSlideTop -= mAnimSpeed;
+                animLineSlideTop -= mCenterLineMoveSpeed;
             }
             if (scanAnimLine != null) {
                 Rect lineRect = new Rect();
@@ -342,6 +358,7 @@ public final class ViewfinderView extends View {
                 lineRect.bottom = animLineSlideTop + mCenterAnimLineH;// 扫描线的宽度15
                 canvas.drawBitmap(((BitmapDrawable) (scanAnimLine)).getBitmap(),null,lineRect, paint);
             }
+            //绘制有效数据点
             Collection<ResultPoint> currentPossible = possibleResultPoints;
             Collection<ResultPoint> currentLast = lastPossibleResultPoints;
             if (currentPossible.isEmpty()) {
@@ -351,18 +368,16 @@ public final class ViewfinderView extends View {
                 possibleResultPoints = new HashSet<ResultPoint>(5);
                 lastPossibleResultPoints = currentPossible;
                 paint.setAlpha(OPAQUE);
-                paint.setColor(resultPointColor);
+                paint.setColor(validScanedPointPixelsColor);
                 for (ResultPoint point : currentPossible) {
-                    canvas.drawCircle(viewfinderRect.left + point.getX(), viewfinderRect.top
-                            + point.getY(), 6.0f, paint);
+                    canvas.drawCircle(viewfinderRect.left + point.getX(), viewfinderRect.top + point.getY(), 6.0f, paint);
                 }
             }
             if (currentLast != null) {
                 paint.setAlpha(OPAQUE / 2);
-                paint.setColor(resultPointColor);
+                paint.setColor(validScanedPointPixelsColor);
                 for (ResultPoint point : currentLast) {
-                    canvas.drawCircle(viewfinderRect.left + point.getX(), viewfinderRect.top
-                            + point.getY(), 3.0f, paint);
+                    canvas.drawCircle(viewfinderRect.left + point.getX(), viewfinderRect.top + point.getY(), 3.0f, paint);
                 }
             }
             // 只刷新扫描框的内容，其他地方不刷新

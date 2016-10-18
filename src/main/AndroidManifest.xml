@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.common.zxinglib">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.google.zxing.client.android">
 
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.INTERNET"/>
