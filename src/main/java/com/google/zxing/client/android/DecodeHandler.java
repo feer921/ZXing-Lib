@@ -69,7 +69,7 @@ final class DecodeHandler extends Handler {
   /**
    * Decode the data within the viewfinder rectangle, and time how long it took. For efficiency,
    * reuse the same reader objects from one decode to the next.
-   *
+   * 注意该方法是运行的工作线程中的，因为本Handler是在DecodeThread线程中构造的
    * @param data   The YUV preview frame.
    * @param width  The width of the preview frame.
    * @param height The height of the preview frame.
@@ -86,7 +86,8 @@ final class DecodeHandler extends Handler {
     int tmp = width; // Here we are swapping, that's the difference to #11
     width = height;
     height = tmp;
-    //modify end
+    //modify end YUV：abbr. 亮度和色差信号（Luma and Chroma，一种颜色编码方法）
+    //buildLuminanceSource()会根据当前的取景框的范围来构建，取景框内的图像的Luminance 信号
     PlanarYUVLuminanceSource source = activity.getCameraManager().buildLuminanceSource(rotatedData, width, height);
     if (source != null) {
       BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));

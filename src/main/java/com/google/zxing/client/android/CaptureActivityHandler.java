@@ -69,7 +69,9 @@ public final class CaptureActivityHandler extends Handler {
 
     // Start ourselves capturing previews and decoding.
     this.cameraManager = cameraManager;
+    //开启预览
     cameraManager.startPreview();
+    //给Camera设置预览回调接口
     restartPreviewAndDecode();
   }
 
@@ -157,12 +159,15 @@ public final class CaptureActivityHandler extends Handler {
     removeMessages(R.id.decode_failed);
   }
 
-  private void restartPreviewAndDecode() {
-    if (state == State.SUCCESS) {
-      state = State.PREVIEW;
-      cameraManager.requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
-      activity.drawViewfinder();
+    /**
+     * 让Camera 设置预览回调接口
+     */
+    private void restartPreviewAndDecode() {
+        if (state == State.SUCCESS) {
+            state = State.PREVIEW;
+            cameraManager.requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
+            activity.drawViewfinder();
+        }
     }
-  }
 
 }
